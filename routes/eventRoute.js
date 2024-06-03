@@ -27,25 +27,22 @@ router
     authService.protect,
     authService.allowedTo('admin', 'manager'),
     uploadEventImage,
-    resizeEventImage,
-    createEventValidator,
+    resizeEventImage,///createEventValidator
     createEvent
   );
 router
   .route('/:id')
-  .get(getEventValidator, getEvent)
+  .get(getEvent)//getEventValidator
   .put(
     authService.protect,
     authService.allowedTo('admin', 'manager'),
     uploadEventImage,
-    resizeEventImage,
-    updateEventValidator,
+    resizeEventImage,//updateEventValidator
     updateEvent
   )
   .delete(
     authService.protect,
-    authService.allowedTo('admin'),
-    deleteEventValidator,
+    authService.allowedTo('admin'),//deleteEventValidator
     deleteEvent
   );
 

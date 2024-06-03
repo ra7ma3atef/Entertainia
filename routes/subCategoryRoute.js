@@ -31,24 +31,21 @@ router
     authService.allowedTo('admin', 'manager'),
     setCategoryIdToBody,
     uploadSubImage,
-    resizeImage,
-    createSubCategoryValidator,
+    resizeImage,///createSubCategoryValidator
     createSubCategory
   )
   .get(createFilterObj, getSubCategories);
 router
   .route('/:id')
-  .get(getSubCategoryValidator, getSubCategory)
+  .get(getSubCategory)//getSubCategoryValidator
   .put(
     authService.protect,
-    authService.allowedTo('admin', 'manager'),
-    updateSubCategoryValidator,
+    authService.allowedTo('admin', 'manager'),//updateSubCategoryValidator
     updateSubCategory
   )
   .delete(
     authService.protect,
-    authService.allowedTo('admin'),
-    deleteSubCategoryValidator,
+    authService.allowedTo('admin'),//deleteSubCategoryValidator
     deleteSubCategory
   );
 

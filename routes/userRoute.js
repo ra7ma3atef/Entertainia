@@ -31,24 +31,23 @@ router.use(authService.protect);
 
 router.get('/getMe', getLoggedUserData, getUser);
 router.put('/changeMyPassword', updateLoggedUserPassword);
-router.put('/updateMe', updateLoggedUserValidator, uploadUserImage, resizeImage,updateLoggedUserData);
+router.put('/updateMe', uploadUserImage, resizeImage,updateLoggedUserData);//updateLoggedUserValidator
 router.delete('/deleteMe', deleteLoggedUserData);
 
 // Admin
 router.use(authService.allowedTo('admin', 'manager'));
 router.put(
-  '/changePassword/:id',
-  changeUserPasswordValidator,
+  '/changePassword/:id',//changeUserPasswordValidator
   changeUserPassword
 );
 router
   .route('/')
   .get(getUsers)
-  .post(uploadUserImage, resizeImage, createUserValidator, createUser);
+  .post(uploadUserImage, resizeImage, createUser);//createUserValidator
 router
   .route('/:id')
-  .get(getUserValidator, getUser)
-  .put(uploadUserImage, resizeImage, updateUserValidator, updateUser)
-  .delete(deleteUserValidator, deleteUser);
+  .get(getUser)//getUserValidator
+  .put(uploadUserImage, resizeImage, updateUser)//updateUserValidator
+  .delete(deleteUser);//deleteUserValidator
 
 module.exports = router;

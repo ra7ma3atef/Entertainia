@@ -32,25 +32,22 @@ router
     authService.protect,
     authService.allowedTo('admin', 'manager'),
     uploadCategoryImage,
-    resizeImage,
-    createCategoryValidator,
+    resizeImage,//createCategoryValidator
     createCategory
   );
 router
   .route('/:id')
-  .get(getCategoryValidator, getCategory)
+  .get(getCategory)//getCategoryValidator
   .put(
     authService.protect,
     authService.allowedTo('admin', 'manager'),
     uploadCategoryImage,
-    resizeImage,
-    updateCategoryValidator,
+    resizeImage,//updateCategoryValidator
     updateCategory
   )
   .delete(
     authService.protect,
-    authService.allowedTo('admin'),
-    deleteCategoryValidator,
+    authService.allowedTo('admin'),//deleteCategoryValidator
     deleteCategory
   );
 

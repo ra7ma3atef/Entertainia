@@ -27,25 +27,22 @@ router
     authService.protect,
     authService.allowedTo('admin', 'manager'),
     uploadNewsImage,
-    resizeImage,
-    createNewsValidator,
+    resizeImage,//createNewsValidator
     createNews
   );
 router
   .route('/:id')
-  .get(getNewsValidator, getNews)
+  .get(getNews)//getNewsValidator
   .put(
     authService.protect,
     authService.allowedTo('admin', 'manager'),
     uploadNewsImage,
-    resizeImage,
-    updateNewsValidator,
+    resizeImage,//updateNewsValidator
     updateNews
   )
   .delete(
     authService.protect,
-    authService.allowedTo('admin'),
-    deleteNewsValidator,
+    authService.allowedTo('admin'),//deleteNewsValidator
     deleteNews
   );
 
