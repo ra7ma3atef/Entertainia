@@ -1,34 +1,63 @@
 const asyncHandler = require('express-async-handler');
-const { v4: uuidv4 } = require('uuid');
-const sharp = require('sharp');
 const bcrypt = require('bcryptjs');
-
+const multer = require("multer")
 const factory = require('./handlersFactory');
 const ApiError = require('../utils/apiError');
-const { uploadSingleImage } = require('../middlewares/uploadImageMiddleware');
+const cloudinary = require("../utils/cloudImage")
 const createToken = require('../utils/createToken');
 const User = require('../models/userModel');
 
 // Upload single image
-exports.uploadUserImage = uploadSingleImage('profileImg');
+const multerStorage = multer.memoryStorage()
 
-// Image processing
+const multerFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith("image")) {
+        cb(null, true)
+    } else {
+        cb(new ApiError('not an image ! please upload only images..', 400), false)
+    }
+}
+
+const upload = multer({
+    storage: multerStorage,
+    fileFilter: multerFilter
+})
+
+exports.uploadUserImage = upload.single('profileImg')
+
 exports.resizeImage = asyncHandler(async (req, res, next) => {
-  const filename = `user-${uuidv4()}-${Date.now()}.jpeg`;
 
-  if (req.file) {
-    await sharp(req.file.buffer)
-      .resize(600, 600)
-      .toFormat('jpeg')
-      .jpeg({ quality: 95 })
-      .toFile(`uploads/users/${filename}`);
+    if (!req.file) return next()
 
-    // Save image into our db
-    req.body.profileImg = filename;
-  }
+    const fileName = `${req.file.originalname}`
 
-  next();
-});
+    const filePath = `EnterTainia/users`
+
+    const result = await uploadToClodinary(req.file.buffer, fileName, filePath)
+    req.body.profileImg = result.secure_url
+
+    next()
+})
+
+
+const uploadToClodinary = (buffer, filename, folderPath, options = {}) => {
+    return new Promise((resolve, reject) => {
+        options.folder = folderPath;
+        options.public_id = filename;
+
+        const uploadStream = cloudinary.uploader.upload_stream(
+            options,
+            (error, result) => {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(result)
+                }
+            }
+        )
+        uploadStream.end(buffer)
+    })
+}
 
 // @desc    Get list of users
 // @route   GET /api/v1/users
@@ -132,6 +161,7 @@ exports.updateLoggedUserData = asyncHandler(async (req, res, next) => {
     {
       name: req.body.name,
       email: req.body.email,
+      profileImg: req.body.profileImg,
       phone: req.body.phone,
     },
     { new: true }

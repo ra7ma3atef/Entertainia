@@ -18,6 +18,7 @@ const subCategorySchema = new mongoose.Schema(
       ref: 'Category',
       required: [true, 'SubCategory must be belong to parent category'],
     },
+    image: String,
   },
   { timestamps: true }
 );

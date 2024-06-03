@@ -10,7 +10,7 @@ exports.addEventTofavorite = asyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
-      $addToSet: { favorite: req.body.eventId },
+      $addToSet: { favEvent: req.query.eventId },
     },
     { new: true }
   );
@@ -30,7 +30,7 @@ exports.removeEventFromfavorite = asyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
-      $pull: { favorite: req.params.eventId },
+      $pull: { favEvent: req.query.eventId },
     },
     { new: true }
   );
@@ -46,7 +46,7 @@ exports.removeEventFromfavorite = asyncHandler(async (req, res, next) => {
 //   GET /api/v1/favorite
 //   Protected/User
 exports.getLoggedUserfavorite = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user._id).populate('favorite');
+  const user = await User.findById(req.user._id).populate('favEvent');
 
   res.status(200).json({
     status: 'success',

@@ -1,5 +1,6 @@
 const path = require('path');
-
+const compression = require("compression")
+const cookieParser = require('cookie-parser');
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
@@ -18,9 +19,10 @@ const userRoute = require('./routes/userRoute');
 const authRoute = require('./routes/authRoute');
 const cartRoute = require('./routes/cartRoute');
 const favoriteRoute = require('./routes/favoriteRoute');
-const bookingRoute = require('./routes/bookingRoute');
+//const bookingRoute = require('./routes/bookingRoute');
 const couponRoute = require('./routes/couponRoute');
-
+const reqRoute = require('./routes/requestRoutes');
+const notRoute = require('./routes/noticeRoute');
 
 
 
@@ -32,9 +34,16 @@ const app = express();
 app.use(cors());
 app.options('*', cors());
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+
+
+app.use(compression())
+
 
 // Middlewares
-app.use(express.json());
 app.use(express.static(path.join(__dirname, 'uploads')));
 
 if (process.env.NODE_ENV === 'development') {
@@ -51,8 +60,10 @@ app.use('/api/v1/users', userRoute);
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/cart',cartRoute);
 app.use('/api/v1/favorite', favoriteRoute);
-app.use('/api/v1/booking', bookingRoute);
+//app.use('/api/v1/booking', bookingRoute);
 app.use('/api/v1/coupons', couponRoute);
+app.use('/api/v1/booking', reqRoute);
+app.use('/api/v1/notice', notRoute);
 
 
 

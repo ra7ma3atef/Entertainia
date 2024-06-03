@@ -8,6 +8,8 @@ const {
   deleteSubCategory,
   setCategoryIdToBody,
   createFilterObj,
+  uploadSubImage,
+  resizeImage,
 } = require('../services/subCategoryService');
 const {
   createSubCategoryValidator,
@@ -28,6 +30,8 @@ router
     authService.protect,
     authService.allowedTo('admin', 'manager'),
     setCategoryIdToBody,
+    uploadSubImage,
+    resizeImage,
     createSubCategoryValidator,
     createSubCategory
   )

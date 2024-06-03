@@ -1,7 +1,9 @@
 const crypto = require('crypto');
-
+const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { promisify } = require('util')
+
 
 const asyncHandler = require('express-async-handler');
 const ApiError = require('../utils/apiError');
@@ -10,54 +12,74 @@ const createToken = require('../utils/createToken');
 
 const User = require('../models/userModel');
 
+const createSendToken = (res, result, statusCode) => {
+  const token = result.generateToken(result._id);
+
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRE_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV == "production") cookieOptions.secure = true;
+
+  res.cookie("jwt", token, cookieOptions);
+
+  result.password = undefined;
+
+  res.status(statusCode).json({
+    status: "success",
+    token,
+    data: {
+      result,
+    },
+  });
+};
+
 // @desc    Signup
 // @route   GET /api/v1/auth/signup
 // @access  Public
 exports.signup = asyncHandler(async (req, res, next) => {
-  // 1- Create user
-  const user = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    passwordConfirm:req.body.passwordConfirm,
-    role:req.body.role
-  });
-
-  // 2- Generate token
-  const token = createToken(user._id);
-
-  res.status(201).json({ data: user, token });
+  const email_exist = req.body.email;
+  const user_exist = await User.findOne({ email: email_exist });
+  if (!user_exist) {
+    const result = await User.create(req.body);
+    createSendToken(res, result, 200);
+  } else {
+    return next(new ApiError("Email is Already Exist", 401));
+  }
 });
 
 // @desc    Login
 // @route   GET /api/v1/auth/login
 // @access  Public
 exports.login = asyncHandler(async (req, res, next) => {
-  // 1) check if password and email in the body (validation)
-  // 2) check if user exist & check if password is correct
-  const user = await User.findOne({ email: req.body.email });
-
-  if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
-    return next(new ApiError('Incorrect email or password', 401));
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return next(new ApiError("please enter a valid email or password", 400));
   }
-  // 3) generate token
-  const token = createToken(user._id);
+  const result = await User.findOne({ email }).select("+password");
+  if (!result || !(await result.correctPassword(password, result.password))) {
+    return next(new ApiError("Incorrect Email or Password", 401));
+  }
 
-  // Delete password from response
-  delete user._doc.password;
-  // 4) send response to client side
-  res.status(200).json({ data: user, token });
+  createSendToken(res, result, 201);
 });
 
 // @desc   make sure the user is logged in
 exports.protect = asyncHandler(async (req, res, next) => {
   // 1) Check if token exist, if exist get
   let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
-    token = req.headers.authorization.split(' ')[1];
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    
+    token = req.headers.authorization.split(' ')[1]
+   
+  } 
+  else if (req.cookies.jwt) {
+    
+    token = req.cookies.jwt
+    console.log("object");
   }
   if (!token) {
     return next(
@@ -69,7 +91,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
   }
 
   // 2) Verify token (no change happens, expired token)
-  const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+  const decoded =  await promisify(jwt.verify)(token, process.env.JWT_SECRET_KEY)
 
   // 3) Check if user exists
   const currentUser = await User.findById(decoded.userId);
@@ -107,8 +129,6 @@ exports.protect = asyncHandler(async (req, res, next) => {
 // ["admin", "manager"]
 exports.allowedTo = (...roles) =>
   asyncHandler(async (req, res, next) => {
-    // 1) access roles
-    // 2) access registered user (req.user.role)
     if (!roles.includes(req.user.role)) {
       return next(
         new ApiError('You are not allowed to access this route', 403)
@@ -143,26 +163,40 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
   await user.save();
 
-  // 3) Send the reset code via email
-  const message = `Hi ${user.name},\n We received a request to reset the password on your Entertainia Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The Entertainia Team`;
-  try {
-    await sendEmail({
-      email: user.email,
-      subject: 'Your password reset code (valid for 10 min)',
-      message,
-    });
-  } catch (err) {
-    user.passwordResetCode = undefined;
-    user.passwordResetExpires = undefined;
-    user.passwordResetVerified = undefined;
+  //3) Send the reset code via email
+  // const transporter = nodemailer.createTransport({
+  //   service: "gmail",
+  //   auth: {
+  //     user: process.env.USER_EMAIL,
+  //     pass: process.env.USER_PASS,
+  //   },
+  // });
+  // const mailOptions = {
+  //   from: process.env.USER_EMAIL,
+  //   to: user.email,
+  //   subject: "reset password",
+  //   html:`<div>
+  //   <h4>Your OTP Code</h4>
+  //   <p>${resetCode}</p>
+  //       </div>`
+  // };
+  // try {
+  //   transporter.sendMail(mailOptions);
+  // } catch (err) {
+  //   user.passwordResetCode = undefined;
+  //   user.passwordResetExpires = undefined;
+  //   user.passwordResetVerified = undefined;
 
-    await user.save();
-   // return next(new ApiError('There is an error in sending email', 500));
-  }
+  //   await user.save();
+
+  //   return next(
+  //     new ApiError(`There is an error in sending email ${err} `, 500)
+  //   );
+  // }
 
   res
     .status(200)
-    .json({ status: 'Success', message: 'Reset code sent to email' });
+    .json({ status: 'Success', message: `Reset code sent to email ${resetCode}`});
 });
 
 // @desc    Verify password reset code

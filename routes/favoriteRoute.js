@@ -12,8 +12,8 @@ const router = express.Router();
 
 router.use(authService.protect, authService.allowedTo('user'));
 
-router.route('/').post(addEventTofavorite).get(getLoggedUserfavorite);
-
-router.delete('/:eventId', removeEventFromfavorite);
+router.post('/',addEventTofavorite)
+router.get('/',getLoggedUserfavorite)
+router.delete('/', removeEventFromfavorite);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema(
@@ -20,12 +21,16 @@ const userSchema = new mongoose.Schema(
     },
     phone: String,
     profileImg: String,
-
     password: {
       type: String,
       required: [true, 'password required'],
       minlength: [6, 'Too short password'],
+      select:false,
     },
+    favEvent:[{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'event'
+  }],
     passwordChangedAt: Date,
     passwordResetCode: String,
     passwordResetExpires: Date,
@@ -45,10 +50,19 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  // Hashing user password
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
+
+userSchema.methods.generateToken = function (id) {
+  return jwt.sign({ userId: id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: process.env.JWT_EXPIRES_IN
+  });
+}
+
+userSchema.methods.correctPassword = async function (candidatepassword, userpassword) {
+  return await bcrypt.compare(candidatepassword, userpassword)
+}
 
 const User = mongoose.model('User', userSchema);
 

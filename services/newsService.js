@@ -1,29 +1,61 @@
 const asyncHandler = require('express-async-handler');
-const { v4: uuidv4 } = require('uuid');
-const sharp = require('sharp');
-
 const factory = require('./handlersFactory');
-const { uploadSingleImage } = require('../middlewares/uploadImageMiddleware');
 const News = require('../models/newsModel');
+const appError = require("../utils/apiError")
+const multer = require("multer")
+const cloudinary = require("../utils/cloudImage")
 
-// Upload single image
-exports.uploadNewsImage = uploadSingleImage('image');
 
-// Image processing
+const multerStorage = multer.memoryStorage()
+
+const multerFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith("image")) {
+        cb(null, true)
+    } else {
+        cb(new appError('not an image ! please upload only images..', 400), false)
+    }
+}
+
+const upload = multer({
+    storage: multerStorage,
+    fileFilter: multerFilter
+})
+
+exports.uploadNewsImage = upload.single('newsImage')
+
 exports.resizeImage = asyncHandler(async (req, res, next) => {
-  const filename = `news-${uuidv4()}-${Date.now()}.jpeg`;
 
-  await sharp(req.file.buffer)
-    .resize(600, 600)
-    .toFormat('jpeg')
-    .jpeg({ quality: 95 })
-    .toFile(`uploads/newss/${filename}`);
+    if (!req.file) return next()
 
-  // Save image into our db 
-   req.body.image = filename;
+    const fileName = `${req.file.originalname}`
 
-  next();
-});
+    const filePath = `EnterTainia/news`
+
+    const result = await uploadToClodinary(req.file.buffer, fileName, filePath)
+    req.body.newsImage = result.secure_url
+
+    next()
+})
+
+
+const uploadToClodinary = (buffer, filename, folderPath, options = {}) => {
+    return new Promise((resolve, reject) => {
+        options.folder = folderPath;
+        options.public_id = filename;
+
+        const uploadStream = cloudinary.uploader.upload_stream(
+            options,
+            (error, result) => {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(result)
+                }
+            }
+        )
+        uploadStream.end(buffer)
+    })
+}
 
 //  Get list of news
 //  GET /api/v1/news

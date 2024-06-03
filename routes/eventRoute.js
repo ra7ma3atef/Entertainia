@@ -12,9 +12,10 @@ const {
   createEvent,
   updateEvent,
   deleteEvent,
-  uploadEventImages,
+  uploadEventImage,
+  resizeEventImage,
 } = require('../services/eventService');
-const { resizeEventImages } = require('../services/resizeEventImages');
+
 const authService = require('../services/authService');
 
 const router = express.Router();
@@ -25,8 +26,8 @@ router
   .post(
     authService.protect,
     authService.allowedTo('admin', 'manager'),
-    uploadEventImages,
-    resizeEventImages,
+    uploadEventImage,
+    resizeEventImage,
     createEventValidator,
     createEvent
   );
@@ -36,8 +37,8 @@ router
   .put(
     authService.protect,
     authService.allowedTo('admin', 'manager'),
-    uploadEventImages,
-    resizeEventImages,
+    uploadEventImage,
+    resizeEventImage,
     updateEventValidator,
     updateEvent
   )

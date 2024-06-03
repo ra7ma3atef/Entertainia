@@ -19,61 +19,59 @@ const eventSchema = new mongoose.Schema(
       required: [true, 'event description is required'],
       minlength: [20, 'Too short event description'],
     },
-    numberofticket: {
+    // numberofticket: {
+    //   type: Number,
+    //   required: [true, 'event quantity is required'],
+    // },
+    // sold: {
+    //   type: Number,
+    //   default: 0,
+    // },
+    pricePre: {
       type: Number,
-      required: [true, 'event quantity is required'],
-    },
-   /* sold: {
-      type: Number,
-      default: 0,
-    },*/
+      required: [true, 'event premium price is required'],
+      trim: true,
+      max: [200000, 'Too long event price'],
+    }, 
     price: {
       type: Number,
       required: [true, 'event price is required'],
       trim: true,
       max: [200000, 'Too long event price'],
-    },
-    priceAfterDiscount: {
-      type: Number,
-    },
-    
+    }, 
     seatnumber: {
       type: Number,
-      //required: [true, 'event seatnumber is required'],
+      required: [true, 'event seatnumber is required'],
       trim: true,
-      max: [200000, 'Too long event seatnumber']},
-
+      max: [200000, 'Too long event seatnumber']
+    },
+    seatNumbers: {
+      type: [Number],
+      default: [], 
+      validate: {
+        validator: function(arr) {
+          return arr.every(num => num >= 1 && num <= this.seatnumber);
+        },
+        message: props => `All seat numbers must be between 1 and ${props.value}.`,
+      },
+    },
     imageCover: {
       type: String,
-      required: [true, 'event Image cover is required'],
+      //required: [true, 'event Image cover is required'],
     },
-    images: [String],
+    category: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Category',
+    },
+    subcategorie:
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'SubCategory',
+      },
   },
   { timestamps: true }
 );
 
-const setImageURL = (doc) => {
-  if (doc.imageCover) {
-    const imageUrl = `${process.env.BASE_URL}/event/${doc.imageCover}`;
-    doc.imageCover = imageUrl;
-  }
-  if (doc.images) {
-    const imagesList = [];
-    doc.images.forEach((image) => {
-      const imageUrl = `${process.env.BASE_URL}/event/${image}`;
-      imagesList.push(imageUrl);
-    });
-    doc.images = imagesList;
-  }
-};
-// findOne, findAll and update
-eventSchema.post('init', (doc) => {
-  setImageURL(doc);
-});
 
-// create
-eventSchema.post('save', (doc) => {
-  setImageURL(doc);
-});
 
 module.exports = mongoose.model('event', eventSchema);

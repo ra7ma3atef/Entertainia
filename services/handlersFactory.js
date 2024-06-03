@@ -10,7 +10,7 @@ exports.deleteOne = (Model) =>
     if (!document) {
       return next(new ApiError(`No document for this id ${id}`, 404));
     }
-    res.status(204).send();
+    res.status(204).json({msg:"deleted successful"});
   });
 
 exports.updateOne = (Model) =>
@@ -30,6 +30,15 @@ exports.updateOne = (Model) =>
 exports.createOne = (Model) =>
   asyncHandler(async (req, res) => {
     const newDoc = await Model.create(req.body);
+    if(Model.modelName == "Event" || Model.modelName == "News"){
+
+      const doc = await Not.create({
+        notification:`${req.user.name} add new ${Model.modelName}\nSee latest ${Model.modelName}s`,
+       // user: req.user.id,
+        image:req.user.profileImg,
+        allUser:true
+    })
+    }
     res.status(201).json({ data: newDoc });
   });
 

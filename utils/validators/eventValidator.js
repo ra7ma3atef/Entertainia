@@ -26,31 +26,26 @@ exports.createEventValidator = [
     .optional()
     .isNumeric()
     .withMessage('Event quantity must be a number'),
-  check('price')
-    .notEmpty()
-    .withMessage('Event price is required')
-    .isNumeric()
-    .withMessage('Event price must be a number')
-    .isLength({ max: 32 })
-    .withMessage('To long price'),
-  check('priceAfterDiscount')
-    .optional()
-    .isNumeric()
-    .withMessage('Event priceAfterDiscount must be a number')
-    .toFloat()
-    .custom((value, { req }) => {
-      if (req.body.price <= value) {
-        throw new Error('priceAfterDiscount must be lower than price');
-      }
-      return true;
-    }),
+  // check('price')
+  //   .notEmpty()
+  //   .withMessage('Event price is required')
+  //   .isNumeric()
+  //   .withMessage('Event price must be a number')
+  //   .isLength({ max: 32 })
+  //   .withMessage('To long price'),
+  // check('priceAfterDiscount')
+  //   .optional()
+  //   .isNumeric()
+  //   .withMessage('Event priceAfterDiscount must be a number')
+  //   .toFloat()
+  //   .custom((value, { req }) => {
+  //     if (req.body.price <= value) {
+  //       throw new Error('priceAfterDiscount must be lower than price');
+  //     }
+  //     return true;
+  //   }),
 
-  check('imageCover').notEmpty().withMessage('Event imageCover is required'),
-  check('images')
-    .optional()
-    .isArray()
-    .withMessage('images should be array of string'),
-
+ // check('imageCover').notEmpty().withMessage('Event imageCover is required'),
   validatorMiddleware,
 ];
 
