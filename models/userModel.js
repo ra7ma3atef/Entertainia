@@ -64,6 +64,17 @@ userSchema.methods.correctPassword = async function (candidatepassword, userpass
   return await bcrypt.compare(candidatepassword, userpassword)
 }
 
+const autoPopulateFavEvent = function(next) {
+  this.populate({
+    path: 'favEvent',
+    select: 'imageCover title price from to'
+  });
+  next();
+};
+
+userSchema.pre('find', autoPopulateFavEvent);
+userSchema.pre('findOne', autoPopulateFavEvent);
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

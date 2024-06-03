@@ -68,6 +68,8 @@ const eventSchema = new mongoose.Schema(
         type: mongoose.Schema.ObjectId,
         ref: 'SubCategory',
       },
+      from:Date,
+      to:Date
   },
   { timestamps: true }
 );
