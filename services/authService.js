@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { promisify } = require('util')
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 
 const asyncHandler = require('express-async-handler');
@@ -163,40 +164,69 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
   await user.save();
 
-  //3) Send the reset code via email
-  // const transporter = nodemailer.createTransport({
-  //   service: "gmail",
-  //   auth: {
-  //     user: process.env.USER_EMAIL,
-  //     pass: process.env.USER_PASS,
-  //   },
-  // });
-  // const mailOptions = {
-  //   from: process.env.USER_EMAIL,
-  //   to: user.email,
-  //   subject: "reset password",
-  //   html:`<div>
-  //   <h4>Your OTP Code</h4>
-  //   <p>${resetCode}</p>
-  //       </div>`
-  // };
-  // try {
-  //   transporter.sendMail(mailOptions);
-  // } catch (err) {
-  //   user.passwordResetCode = undefined;
-  //   user.passwordResetExpires = undefined;
-  //   user.passwordResetVerified = undefined;
+ // 3) Send the reset code via email
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.USER_EMAIL,
+      pass: process.env.USER_PASS,
+    },
+  });
+  const mailOptions = {
+    from: "Entertainia Team",
+    to: user.email,
+    subject: "reset password",
+    html:` <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>OTP for Password Reset</title>
+        <style>
+            .container {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                width: 300px;
+                margin: 0 auto;
+            }
+            h4 {
+                color: #333;
+            }
+            p {
+                font-size: 18px;
+                color: #555;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h4>Your OTP Code</h4>
+            <p>${resetCode}</p>
+        </div>
+    </body>
+    </html>
+`
+  };
+  try {
+    transporter.sendMail(mailOptions);
+  } catch (err) {
+    user.passwordResetCode = undefined;
+    user.passwordResetExpires = undefined;
+    user.passwordResetVerified = undefined;
 
-  //   await user.save();
+    await user.save();
 
-  //   return next(
-  //     new ApiError(`There is an error in sending email ${err} `, 500)
-  //   );
-  // }
+    return next(
+      new ApiError(`There is an error in sending email ${err} `, 500)
+    );
+  }
 
   res
     .status(200)
-    .json({ status: 'Success', message: `Reset code sent to email ${resetCode}`});
+    .json({ status: 'Success', message: `Reset code sent to email`});
 });
 
 // @desc    Verify password reset code

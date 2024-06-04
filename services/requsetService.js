@@ -49,7 +49,7 @@ exports.createOne = asyncHandler(async (req, res) => {
     }
     const newDoc = await Model.create(req.body);
 
-    const doc = await Not.create({
+     await Not.create({
         notification:`Your ticket booking was successful!`,
         user: req.user.id,
         image:req.user.profileImg,
