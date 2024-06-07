@@ -69,11 +69,10 @@ const eventSchema = new mongoose.Schema(
         ref: 'SubCategory',
       },
       from:Date,
-      to:Date
+      to:Date,
+      location:String
   },
   { timestamps: true }
 );
-
-
 
 module.exports = mongoose.model('event', eventSchema);

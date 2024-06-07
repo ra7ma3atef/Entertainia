@@ -50,7 +50,7 @@ exports.getLoggedUserfavorite = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    results: user.favorite.length,
-    data: user.favorite,
+    results: user.favEvent.length,
+    data: user.favEvent,
   });
 });

@@ -72,7 +72,7 @@ const autoPopulateFavEvent = function(next) {
   next();
 };
 
-userSchema.pre('find', autoPopulateFavEvent);
+userSchema.pre('find', autoPopulateFavEvent); 
 userSchema.pre('findOne', autoPopulateFavEvent);
 
 const User = mongoose.model('User', userSchema);
