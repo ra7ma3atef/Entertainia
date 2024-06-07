@@ -12,7 +12,8 @@ const reqSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum:["Premium,Regular"]
+      enum:["Premium","Regular"],
+      required:true
     }, 
     price: {
       type: Number,
@@ -24,12 +25,14 @@ const reqSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'event seatnumber is required'],
       trim: true,
-      max: [200000, 'Too long event seatnumber']},
-
+      max: [200000, 'Too long event seatnumber'],
+      required:true,
+    },
     imageCover: {
       type: String,
       //required: [true, 'event Image cover is required'],
     },
+    date:Date
   },
   { timestamps: true }
 );

@@ -28,25 +28,45 @@ exports.updateOne = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data: document });
   });
 
-exports.createOne = asyncHandler(async (req, res) => {
-    req.body.userId=req.user.id
-    req.body.eventId=req.params.id
-    if(req.body.seatnumber){
-        const event =await Event.findById(req.params.id)
-        req.body.imageCover=event.imageCover
-        if(!event.seatNumbers.includes(seatnumber)){
-            return next(
-                new ApiError(`this Seat number is booked up`, 400)
-              );
-        }
-        if(seatnumber < 1 || seatnumber > event.seatnumber){
-            return next(
-                new ApiError(`Seat number must be between 1 and ${event.seatnumber}`, 400)
-              );
-        }
-        event.seatNumbers.push(seatnumber);
-        await event.save();
-    }
+exports.createOne = asyncHandler(async (req, res,next) => {
+  req.body.userId = req.user.id;
+  req.body.eventId = req.query.eventId;
+  let seatnumber = req.body.seatnumber;
+
+  if (seatnumber) {
+      const event = await Event.findById(req.query.eventId);
+
+      if (!event) {
+          return next(new ApiError(`Event not found`, 404));
+      }
+
+      if (event.seatNumbers.includes(seatnumber)) {
+          return next(new ApiError(`This seat number is booked up`, 400));
+      }
+
+      if (seatnumber < 1 || seatnumber > event.seatnumber) {
+          return next(new ApiError(`Seat number must be between 1 and ${event.seatnumber}`, 400));
+      }
+
+      if (req.body.type === "Regular") {
+          req.body.price = event.price;
+      } else if (req.body.type === "Premium") {
+          req.body.price = event.pricePre;
+      } else {
+          return next(new ApiError(`Invalid ticket type`, 400));
+      }
+
+      req.body.imageCover = event.imageCover;
+      event.seatNumbers.push(seatnumber);
+      // console.log("ahmed");
+       await event.save();
+
+  } else {
+      return next(new ApiError(`Seat number is required`, 400));
+  }
+
+  // Assuming you are creating a booking or a similar document
+  
     const newDoc = await Model.create(req.body);
 
      await Not.create({
