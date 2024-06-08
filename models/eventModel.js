@@ -7,7 +7,7 @@ const eventSchema = new mongoose.Schema(
       required: true,
       trim: true,
       minlength: [3, 'Too short event title'],
-      maxlength: [100, 'Too long event title'],
+      //maxlength: [100, 'Too long event title'],
     },
     slug: {
       type: String,
@@ -17,7 +17,7 @@ const eventSchema = new mongoose.Schema(
     description: {
       type: String,
       required: [true, 'event description is required'],
-      minlength: [20, 'Too short event description'],
+     // minlength: [20, 'Too short event description'],
     },
     // numberofticket: {
     //   type: Number,
@@ -54,6 +54,7 @@ const eventSchema = new mongoose.Schema(
     seatNumbers: {
       type: [Number],
       default: [], 
+      select:false,
       validate: {
         validator: function(arr) {
           return arr.every(num => num >= 1 && num <= this.seatnumber);

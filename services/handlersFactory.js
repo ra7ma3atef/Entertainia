@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const ApiError = require('../utils/apiError');
 const ApiFeatures = require('../utils/apiFeatures');
+const Not = require("../models/noticeService")
 
 exports.deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {
@@ -30,8 +31,8 @@ exports.updateOne = (Model) =>
 exports.createOne = (Model) =>
   asyncHandler(async (req, res) => {
     const newDoc = await Model.create(req.body);
-    if(Model.modelName == "Event" || Model.modelName == "News"){
-
+    console.log(Model.modelName);
+    if(Model.modelName == "event" || Model.modelName == "News"){
       const doc = await Not.create({
         notification:`${req.user.name} add new ${Model.modelName}\nSee latest ${Model.modelName}s`,
        // user: req.user.id,
