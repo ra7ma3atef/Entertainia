@@ -80,7 +80,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
   else if (req.cookies.jwt) {
     
     token = req.cookies.jwt
-    console.log("object");
+    //console.log("object");
   }
   if (!token) {
     return next(

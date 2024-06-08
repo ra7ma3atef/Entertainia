@@ -58,6 +58,7 @@ exports.createOne = asyncHandler(async (req, res,next) => {
 
       req.body.imageCover = event.imageCover;
       event.seatNumbers.push(seatnumber);
+      event.placesLeft -= 1
       // console.log("ahmed");
        await event.save();
 
@@ -87,24 +88,29 @@ exports.getOne = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data: document });
   });
 
-exports.getAll =  asyncHandler(async (req, res) => {
+  exports.getAll = asyncHandler(async (req, res) => {
     let filter = {};
     if (req.filterObj) {
       filter = req.filterObj;
     }
+    
+    // Add userId condition to the filter
+    filter.userId = req.user.id;
+  
     // Build query
-    const documentsCounts = await Model.countDocuments();
+    const documentsCounts = await Model.countDocuments(filter);
     const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
       .paginate(documentsCounts)
       .filter()
       .limitFields()
       .sort();
-
+  
     // Execute query
     const { mongooseQuery, paginationResult } = apiFeatures;
     const documents = await mongooseQuery;
-
+  
     res
       .status(200)
       .json({ results: documents.length, paginationResult, data: documents });
   });
+  

@@ -43,7 +43,13 @@ const eventSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'event seatnumber is required'],
       trim: true,
-      max: [200000, 'Too long event seatnumber']
+    //  max: [200000, 'Too long event seatnumber']
+    },
+    placesLeft: {
+      type: Number,
+     // required: true,
+      trim: true,
+     // max: [200000, 'Too long event quantity'],
     },
     seatNumbers: {
       type: [Number],
@@ -74,5 +80,12 @@ const eventSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+eventSchema.pre('save', function(next) {
+  if (this.isNew && this.placesLeft === undefined) {
+    this.placesLeft = this.seatnumber;
+  }
+  next();
+});
 
 module.exports = mongoose.model('event', eventSchema);
