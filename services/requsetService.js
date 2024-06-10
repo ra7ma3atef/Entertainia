@@ -34,7 +34,7 @@ exports.createOne = asyncHandler(async (req, res,next) => {
   let seatnumber = req.body.seatnumber;
 
   if (seatnumber) {
-      const event = await Event.findById(req.query.eventId);
+      const event = await Event.findById(req.query.eventId).select("+seatNumbers");
 
       if (!event) {
           return next(new ApiError(`Event not found`, 404));
