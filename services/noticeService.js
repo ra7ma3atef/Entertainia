@@ -23,13 +23,13 @@ exports.getOne = asyncHandler(async (req, res, next) => {
   });
 
 exports.getAll =  asyncHandler(async (req, res) => {
-      
+      let filter ={}
       filter.$or = [
         { user: req.user.id },
         { forAllUsers: true }
       ];
     
-    const documents = await Notification.find(filter).sort({ createdAt: -1 });
+    const documents = await Model.find(filter).sort({ createdAt: -1 });
 
     res
       .status(200)

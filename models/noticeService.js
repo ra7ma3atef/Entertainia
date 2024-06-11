@@ -12,7 +12,8 @@ const notificationSchema = new mongoose.Schema(
     },
     allUser:{
         type:Boolean,
-        default:false
+        default:false,
+        select:false,
     },
     image:String
   },
