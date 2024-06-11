@@ -31,9 +31,9 @@ exports.updateOne = (Model) =>
 exports.createOne = (Model) =>
   asyncHandler(async (req, res) => {
     const newDoc = await Model.create(req.body);
-    console.log(Model.modelName);
+    //console.log(Model.modelName);
     if(Model.modelName == "event" || Model.modelName == "News"){
-      const doc = await Not.create({
+       await Not.create({
         notification:`${req.user.name} add new ${Model.modelName}\nSee latest ${Model.modelName}s`,
        // user: req.user.id,
         image:req.user.profileImg,

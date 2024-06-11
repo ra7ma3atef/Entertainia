@@ -37,4 +37,21 @@ const reqSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+reqSchema.post('save', async function(doc, next) {
+  try {
+   // console.log("object");
+    const m = await mongoose.model('User').findByIdAndUpdate(
+      doc.userId,
+      { $inc: { Booking: 1 } },
+      { new: true, useFindAndModify: false }
+    );
+    //console.log(m);
+    next();
+  } catch (error) {
+   // console.log(error);
+    next(error);
+  }
+});
+
 module.exports = mongoose.model('request', reqSchema);
