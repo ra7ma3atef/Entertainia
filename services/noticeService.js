@@ -22,16 +22,25 @@ exports.getOne = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data: document });
   });
 
-exports.getAll =  asyncHandler(async (req, res) => {
-      let filter ={}
-      filter.$or = [
-        { user: req.user.id },
-        { forAllUsers: true }
-      ];
-    
+  exports.getAll = asyncHandler(async (req, res) => {
+    let filter = {
+      $and: [
+        {
+          $or: [
+            { user: req.user.id },
+            { forAllUsers: true }
+          ]
+        },
+        {
+          createdAt: { $gte: req.user.createdAt } // Filter notices created after the user account creation
+        }
+      ]
+    };
+  
     const documents = await Model.find(filter).sort({ createdAt: -1 });
-
+  
     res
       .status(200)
       .json({ results: documents.length, data: documents });
   });
+  

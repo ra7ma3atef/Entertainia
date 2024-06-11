@@ -23,7 +23,7 @@ const favoriteRoute = require('./routes/favoriteRoute');
 const couponRoute = require('./routes/couponRoute');
 const reqRoute = require('./routes/requestRoutes');
 const notRoute = require('./routes/noticeRoute');
-
+const reviewRoute = require("./routes/reviewRoute")
 
 
 // Connect with db
@@ -64,7 +64,7 @@ app.use('/api/v1/favorite', favoriteRoute);
 app.use('/api/v1/coupons', couponRoute);
 app.use('/api/v1/booking', reqRoute);
 app.use('/api/v1/notice', notRoute);
-
+app.use('/api/v1/review', reviewRoute);
 
 
 

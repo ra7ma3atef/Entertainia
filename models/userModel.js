@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema(
     Booking:{
       type:Number,
       default:0
+    },
+    Review:{
+      type:Number,
+      default:0
     }
   },
  // { timestamps: true }

@@ -70,6 +70,7 @@ const eventSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: 'Category',
     },
+    rate:Number,
     subcategorie:
       {
         type: mongoose.Schema.ObjectId,
